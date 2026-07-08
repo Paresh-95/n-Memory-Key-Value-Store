@@ -108,29 +108,3 @@ Runs concurrent `SET`/`GET` pairs across the given number of threads and
 reports total throughput (ops/sec), useful for evaluating the impact of
 locking strategy and capacity/eviction settings.
 
-## Design Notes
-
-- **Locking**: a single `std::shared_mutex` guards the map and LRU list.
-  Reads that don't mutate LRU order (`exists`) take a shared lock; `get`
-  takes a unique lock since it must update LRU position and may lazily
-  evict an expired entry.
-- **Expiration**: entries store an optional `steady_clock` expiry time.
-  Expired entries are removed either lazily (on next access) or by a
-  background thread that wakes on a timer via `condition_variable_any`
-  and exits cleanly on shutdown.
-- **Eviction**: when a capacity is configured, a doubly linked list tracks
-  recency of use; the map stores an iterator into that list per entry so
-  both lookup and LRU promotion/eviction are O(1) on average.
-- **Concurrency model**: the server accepts connections on the main thread
-  and spawns one worker thread per client, all sharing a single `KVStore`
-  instance — demonstrating multithreaded access to a shared, lock-protected
-  resource rather than one store per connection.
-
-## Concepts Demonstrated
-- Object-Oriented Programming and RAII (background thread lifecycle tied to
-  `KVStore` construction/destruction)
-- STL containers (`unordered_map`, `list`) and standard synchronization
-  primitives (`shared_mutex`, `condition_variable_any`, `atomic`)
-- Multithreading and concurrency control
-- Systems programming with POSIX sockets
-- Basic performance profiling via the bundled benchmark tool
