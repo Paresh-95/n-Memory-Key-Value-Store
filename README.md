@@ -5,6 +5,10 @@ operations, configurable key expiration (TTL), thread-safe concurrent access,
 and is exposed over a simple TCP protocol so multiple clients can connect at
 once.
 
+> This repository also contains a second, independent project: an
+> [order matching engine](order-matching-engine/) with price-time priority
+> matching. See its own README for details.
+
 ## Features
 - CRUD operations (`SET`, `GET`, `DEL`, plus `EXISTS`/`TTL`/`EXPIRE`)
 - Configurable per-key expiration (TTL) with lazy expiry on access and a
